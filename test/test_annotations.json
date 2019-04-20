@@ -1,0 +1,136 @@
+{
+  "info": {
+    "description": "This is a test subset of v1.0 of the VQA dataset.",
+    "url": "http://visualqa.org",
+    "version": "1.0",
+    "year": 2015,
+    "contributor": "VQA Team",
+    "date_created": "2015-10-02 19:28:08"
+  },
+  "data_type": "mscoco",
+  "license": {
+    "url": "http://creativecommons.org/licenses/by/4.0/",
+    "name": "Creative Commons Attribution 4.0 International License"
+  },
+  "data_subtype": "train2014",
+  "annotations": [
+    {
+      "question_type": "what",
+      "multiple_choice_answer": "curved",
+      "answers": [
+        {
+          "answer": "oval",
+          "answer_confidence": "yes",
+          "answer_id": 1
+        },
+        {
+          "answer": "semi circle",
+          "answer_confidence": "yes",
+          "answer_id": 2
+        },
+        {
+          "answer": "curved",
+          "answer_confidence": "yes",
+          "answer_id": 3
+        },
+        {
+          "answer": "curved",
+          "answer_confidence": "yes",
+          "answer_id": 4
+        },
+        {
+          "answer": "double curve",
+          "answer_confidence": "yes",
+          "answer_id": 5
+        },
+        {
+          "answer": "banana",
+          "answer_confidence": "maybe",
+          "answer_id": 6
+        },
+        {
+          "answer": "curved",
+          "answer_confidence": "yes",
+          "answer_id": 7
+        },
+        {
+          "answer": "wavy",
+          "answer_confidence": "yes",
+          "answer_id": 8
+        },
+        {
+          "answer": "twisting",
+          "answer_confidence": "no",
+          "answer_id": 9
+        },
+        {
+          "answer": "curved",
+          "answer_confidence": "maybe",
+          "answer_id": 10
+        }
+      ],
+      "image_id": 487025,
+      "answer_type": "other",
+      "question_id": 4870250
+    },
+    {
+      "question_type": "is there a",
+      "multiple_choice_answer": "yes",
+      "answers": [
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 1
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 2
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 3
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 4
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 5
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 6
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 7
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 8
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 9
+        },
+        {
+          "answer": "yes",
+          "answer_confidence": "yes",
+          "answer_id": 10
+        }
+      ],
+      "image_id": 487025,
+      "answer_type": "yes/no",
+      "question_id": 4870251
+    }
+  ]
+}

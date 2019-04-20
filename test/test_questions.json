@@ -1,0 +1,29 @@
+{
+  "info": {
+    "description": "This is a test subset of v1.0 of the VQA dataset.",
+    "url": "http://visualqa.org",
+    "version": "1.0",
+    "year": 2015,
+    "contributor": "VQA Team",
+    "date_created": "2015-10-02 19:28:08"
+  },
+  "task_type": "Open-Ended",
+  "data_type": "mscoco",
+  "license": {
+    "url": "http://creativecommons.org/licenses/by/4.0/",
+    "name": "Creative Commons Attribution 4.0 International License"
+  },
+  "data_subtype": "train2014",
+  "questions": [
+    {
+      "question": "What shape is the bench seat?",
+      "image_id": 487025,
+      "question_id": 4870250
+    },
+    {
+      "question": "Is there a shadow?",
+      "image_id": 487025,
+      "question_id": 4870251
+    }
+  ]
+}
