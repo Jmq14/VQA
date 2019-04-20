@@ -1,8 +1,35 @@
 from torch.utils.data import Dataset
 from external.vqa.vqa import VQA
-import glob
+import re
 import os
 import skimage.io as io
+
+
+def _build_dictionary(vqa, min_thre=6):
+    """
+    :param vqa: VQA instance
+    :param min_thre: minimal times for a word ta appearing in the dataset
+    :return: word dictionary list
+    """
+    counter = {}
+    for q in vqa.qqa.items()[:10]:
+        print(q)
+        print(q[1]['question'])
+        words = re.findall(r"[\w']+", q[1]['question'])
+        for word in words:
+            if counter[word]:
+                counter[word] += 1
+            else:
+                counter[word] = 1
+    d = {}
+    indx = 0
+    for word, num in counter.items():
+        if num > min_thre:
+            d[word] = indx
+            indx += 1
+    return d
+
+
 
 class VqaDataset(Dataset):
     """
@@ -24,7 +51,10 @@ class VqaDataset(Dataset):
         self.ques_idx_list = self.vqa.getQuesIds()
         self.image_dir = image_dir
         self.image_filename_pattern = image_filename_pattern
-        self.dictionary = self._build_dictionary()
+        if True:
+            self.dictionary = {}  # TODO: load from disk
+        else:
+            self.dictionary = _build_dictionary(self.vqa)
 
     def __len__(self):
         return len(self.image_idx_list)
@@ -35,5 +65,4 @@ class VqaDataset(Dataset):
         image_path = os.path.join(self.image_dir, self.image_filename_pattern.format(image_id))
         image = io.imread(image_path)
 
-    def _build_dictionary(self):
-        pass
+
