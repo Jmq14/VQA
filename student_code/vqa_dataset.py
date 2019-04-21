@@ -47,7 +47,6 @@ def _build_answer_dictionary(vqa, min_thre=0):
     for ques_idx in vqa.getQuesIds():
         answers = vqa.qa[ques_idx]['answers']
         answer = _get_majority_ans(answers)
-        print(answer)
         counter[answer] += 1
     ans_dict = {}
     indx = 0
@@ -78,7 +77,7 @@ def _encode_answer(sentence, dictionary):
     :param: answer - index dictionary
     :return: 1 x N one-hot torch tensor (N is the number of all answers) 
     """
-    encode = torch.zeros(len(dictionary) + 1).type(torch.FloatTensor)
+    encode = torch.zeros((len(dictionary) + 1)).type(torch.LongTensor)
     if sentence in dictionary.keys():
         encode[dictionary[sentence]] = 1
     else:
@@ -109,17 +108,23 @@ class VqaDataset(Dataset):
             with open('ques_dictionary.pkl', 'rb') as f:
                 self.dictionary = pickle.load(f) 
         else:
-            self.dictionary = _build_question_dictionary(self.vqa)
-            with open('ques_dictionary.pkl', 'wb') as f:
-                pickle.dump(self.dictionary, f)
+            if is_training:
+                self.dictionary = _build_question_dictionary(self.vqa)
+                with open('ques_dictionary.pkl', 'wb') as f:
+                    pickle.dump(self.dictionary, f)
+            else:
+                raise "No dictionary built from training dataset!"
 
         if os.path.exists('ans_dictionary.pkl'): 
             with open('ans_dictionary.pkl', 'rb') as f:
                 self.answers = pickle.load(f) 
         else:
-            self.answers = _build_answer_dictionary(self.vqa)
-            with open('ans_dictionary.pkl', 'wb') as f:
-                pickle.dump(self.answers, f)
+            if is_training:
+                self.answers = _build_answer_dictionary(self.vqa)
+                with open('ans_dictionary.pkl', 'wb') as f:
+                    pickle.dump(self.answers, f)
+            else:
+                raise "No answer list built from training dataset!"
 
         # print(self.dictionary)
         # print(self.answers)
@@ -134,7 +139,7 @@ class VqaDataset(Dataset):
             ])
         else:
             self.image_transform = transforms.Compose([
-                transforms.CenterResizedCrop(224),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -149,7 +154,7 @@ class VqaDataset(Dataset):
 
         image_id = ann['image_id']
         image_path = os.path.join(self.image_dir, self.image_filename_pattern.format(str(image_id).zfill(12)))
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert('RGB')
         image = self.image_transform(image)
 
         question = self.vqa.qqa[ques_idx]['question']
@@ -159,8 +164,8 @@ class VqaDataset(Dataset):
                 'image': image,
                 'question': question,
                 'answer': best_answer,
-                'question_encode': _encode_question(question, self.dictionary),
-                'answer_encode': _encode_answer(best_answer, self.answers),
+                'question_encoding': _encode_question(question, self.dictionary),
+                'answer_encoding': _encode_answer(best_answer, self.answers),
                 }
 
 
