@@ -157,8 +157,8 @@ class VqaDataset(Dataset):
         ann = self.vqa.loadQA(ques_idx)[0]
 
         image_id = ann['image_id']
-        image_path = self.image_filename_pattern.format(str(image_id).zfill(12))
-        image_path = os.path.join(self.image_dir, image_path)
+        image_name = self.image_filename_pattern.format(str(image_id).zfill(12))
+        image_path = os.path.join(self.image_dir, image_name)
         image = Image.open(image_path).convert('RGB')
         image = self.image_transform(image)
 
@@ -167,7 +167,7 @@ class VqaDataset(Dataset):
         best_answer = _get_majority_ans(answers)
         return {
                 'image': image,
-                'image_name': image_path,
+                'image_path': image_name,
                 'question': question,
                 'answer': best_answer,
                 'question_encoding': _encode_question(question, self.dictionary),

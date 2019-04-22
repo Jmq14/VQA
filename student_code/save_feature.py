@@ -18,11 +18,14 @@ def extract_features(model, batch_data, output_path):
 
     feat = model(images)
     feat = feat.data.cpu().numpy()
+    # print(feat.shape)
     feat = feat.reshape((feat.shape[0], feat.shape[1], -1))
+    # print(feat.shape)
 
     for i in range(feat.shape[0]):
         path = os.path.join(
             output_path, os.path.splitext(image_path[i])[0] + '_resnet_feature')
+        # print(path)
         np.save(path, feat[i])
 
 
@@ -38,11 +41,11 @@ def save_features(args):
                              image_filename_pattern="COCO_val2014_{}.jpg",
                              is_training=False)
 
-    train_data = DataLoader(train_dataset, batch_size=10, shuffle=False, num_workers=args.num_data_loader_workers)
-    val_data = DataLoader(val_dataset, batch_size=10, shuffle=False, num_workers=args.num_data_loader_workers)
+    train_data = DataLoader(train_dataset, batch_size=32, shuffle=False, num_workers=args.num_data_loader_workers)
+    val_data = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=args.num_data_loader_workers)
 
     model = models.resnet152(pretrained=True)
-    model = nn.Sequential(*list(model.children())[:-2])
+    model = nn.Sequential(*list(model.children())[:-3])
 
     if torch.cuda.is_available():
         model = model.cuda()
@@ -50,10 +53,12 @@ def save_features(args):
     model.eval()
 
     for batch_id, batch_data in enumerate(train_data):
-        extract_features(model, batch_data, args.output_path)
+        print('Training data {}/{}'.format(batch_id, len(train_data)))
+        extract_features(model, batch_data, os.path.join(args.output_path, 'train2014'))
 
     for batch_id, batch_data in enumerate(val_data):
-        extract_features(model, batch_data, args.output_path)
+        print('Validation data {}/{}'.format(batch_id, len(train_data)))
+        extract_features(model, batch_data, os.path.join(args.output_path, 'val2014'))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Load feature.')
