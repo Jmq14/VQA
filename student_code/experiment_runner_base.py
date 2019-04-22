@@ -18,7 +18,7 @@ class ExperimentRunnerBase(object):
         self._train_dataset_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_data_loader_workers)
 
         # If you want to, you can shuffle the validation dataset and only use a subset of it to speed up debugging
-        self._val_dataset_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_data_loader_workers)
+        self._val_dataset_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=num_data_loader_workers)
 
         # Use the GPU if it's available.
         self._cuda = torch.cuda.is_available()
@@ -32,10 +32,12 @@ class ExperimentRunnerBase(object):
         """
         raise NotImplementedError()
 
-    def validate(self):
+    def validate(self, is_last=False):
         total = 0.
         correct = 0.
         for batch_id, batch_data in enumerate(self._val_dataset_loader):
+            if not is_last and batch_id >= 50:
+                break
             images = batch_data['image']
             questions = batch_data['question_encoding']
             answers = torch.max(batch_data['answer_encoding'], 1)[1]
@@ -47,15 +49,12 @@ class ExperimentRunnerBase(object):
             ground_truth_answer = answers
             total += ground_truth_answer.size(0)
             correct += (torch.max(predicted_answer, 1)[1] == ground_truth_answer).sum().item()
-        return 100 * correct / total
+        return correct / total
             
     def train(self):
         writer = SummaryWriter()
         for epoch in range(self._num_epochs):
             num_batches = len(self._train_dataset_loader)
-
-            self._model.eval()
-            val_accuracy = self.validate()
 
             for batch_id, batch_data in enumerate(self._train_dataset_loader):
                 self._model.train()  # Set the model to train mode
@@ -90,3 +89,8 @@ class ExperimentRunnerBase(object):
                     val_accuracy = self.validate()
                     print("Epoch: {} has val accuracy {}".format(epoch, val_accuracy))
                     writer.add_scalar('val/accuracy', val_accuracy, current_step)
+
+            self._model.eval()
+            val_accuracy = self.validate(is_last=True)
+            print("Epoch val accuracy {}".format(val_accuracy))
+            writer.add_scalar('val/accuracy', val_accuracy, epoch*num_batches)
