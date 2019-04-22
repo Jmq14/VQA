@@ -57,17 +57,19 @@ def _build_answer_dictionary(vqa, min_thre=0):
     return ans_dict
 
 
-def _encode_question(sentence, dictionary):
+def _encode_question(sentence, dictionary, max_question_length=26):
     """
     :param sentence: question sentence
     :param: word - index dictionary
-    :return: M x N one-hot torch tensor (M is the number of words in the sentence; N is the number of vocabularies) 
+    :return: M x N one-hot torch tensor (M is the max number of words; N is the number of vocabularies)
     """
     words = re.findall(r"[\w']+", sentence)
-    encode = torch.zeros((len(dictionary))).type(torch.FloatTensor)
+    encode = torch.zeros((max_question_length, len(dictionary))).type(torch.FloatTensor)
     for i, word in enumerate(words):
+        if i >= max_question_length:
+            break
         if word in dictionary.keys():
-            encode[dictionary[word]] = 1
+            encode[i, dictionary[word]] = 1
     return encode
 
 
@@ -75,14 +77,15 @@ def _encode_answer(sentence, dictionary):
     """
     :param sentence: answer sentence
     :param: answer - index dictionary
-    :return: 1 x N one-hot torch tensor (N is the number of all answers) 
+    :return: indices
     """
-    encode = torch.zeros((len(dictionary) + 1)).type(torch.LongTensor)
-    if sentence in dictionary.keys():
-        encode[dictionary[sentence]] = 1
-    else:
-        encode[-1] = 1
-    return encode
+    # encode = torch.zeros((len(dictionary) + 1)).type(torch.LongTensor)
+    # if sentence in dictionary.keys():
+    #     encode[dictionary[sentence]] = 1
+    # else:
+    #     encode[-1] = 1
+    # return encode
+    return dictionary[sentence]
 
 
 class VqaDataset(Dataset):
@@ -104,6 +107,7 @@ class VqaDataset(Dataset):
         self.ques_idx_list = self.vqa.getQuesIds()
         self.image_dir = image_dir
         self.image_filename_pattern = image_filename_pattern
+
         if os.path.exists('ques_dictionary.pkl'):
             with open('ques_dictionary.pkl', 'rb') as f:
                 self.dictionary = pickle.load(f) 
@@ -153,7 +157,8 @@ class VqaDataset(Dataset):
         ann = self.vqa.loadQA(ques_idx)[0]
 
         image_id = ann['image_id']
-        image_path = os.path.join(self.image_dir, self.image_filename_pattern.format(str(image_id).zfill(12)))
+        image_path = self.image_filename_pattern.format(str(image_id).zfill(12))
+        image_path = os.path.join(self.image_dir, image_path)
         image = Image.open(image_path).convert('RGB')
         image = self.image_transform(image)
 
@@ -162,6 +167,7 @@ class VqaDataset(Dataset):
         best_answer = _get_majority_ans(answers)
         return {
                 'image': image,
+                'image_name': image_path,
                 'question': question,
                 'answer': best_answer,
                 'question_encoding': _encode_question(question, self.dictionary),

@@ -39,8 +39,10 @@ class ExperimentRunnerBase(object):
             if not is_last and batch_id >= 50:
                 break
             images = batch_data['image']
-            questions = batch_data['question_encoding']
-            answers = torch.max(batch_data['answer_encoding'], 1)[1]
+            questions = torch.max(batch_data['question_encoding'], 0)[0]
+            print(questions.shape)
+            # answers = torch.max(batch_data['answer_encoding'], 1)[1]
+            answers = batch_data['answer_encoding']
             if self._cuda:
                 images = images.cuda()
                 questions = questions.cuda()
