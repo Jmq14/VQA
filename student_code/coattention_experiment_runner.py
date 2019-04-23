@@ -16,11 +16,11 @@ class CoattentionNetExperimentRunner(ExperimentRunnerBase):
         train_dataset = VqaDataset(image_dir=train_image_dir,
                                    question_json_file_path=train_question_path,
                                    annotation_json_file_path=train_annotation_path,
-                                   image_filename_pattern="COCO_train2014_{}.jpg")
+                                   image_filename_pattern="COCO_train2014_{}_resnet_feature.npy")
         val_dataset = VqaDataset(image_dir=test_image_dir,
                                  question_json_file_path=test_question_path,
                                  annotation_json_file_path=test_annotation_path,
-                                 image_filename_pattern="COCO_val2014_{}.jpg")
+                                 image_filename_pattern="COCO_val2014_{}_resnet_feature.npy")
 
         model = CoattentionNet(n_emb=512,
                                n_img=2048,

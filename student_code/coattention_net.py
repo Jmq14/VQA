@@ -111,31 +111,27 @@ class CoattentionNet(nn.Module):
         phase_feat_2 = self.phase_level_2(word_feat_T)
         phase_feat_3 = self.phase_level_3(word_feat_T)
         phase_feat_T = torch.max(torch.cat([
-            phase_feat_1[:, None],
-            phase_feat_2[:, None],
-            phase_feat_3[:, None]], 3), 3, keepdim=False)[0]
+            phase_feat_1[:, :, :, None],
+            phase_feat_2[:, :, :, None],
+            phase_feat_3[:, :, :, None]], 3), 3, keepdim=False)[0]
         phase_feat = phase_feat_T.permute(0, 2, 1)  # N x S x n_emb
+        # print(phase_feat_1.shape, phase_feat_2.shape, phase_feat_3.shape, phase_feat.shape)
         phase_feat = self.phase_level_activate(phase_feat)
 
         # question level
+        # print(phase_feat.shape)
         ques_feat, _ = self.ques_level(phase_feat)  # N x S x n_emb
 
         # ============= Alter Attention  =============
         v = self.image_encoder(image)
 
-        v_w_hat, q_w_hat = self.alter_coattention(word_feat, v)
-        # N * 512
-        v_p_hat, q_p_hat = self.alter_coattention(phase_feat, v)
-        # N * 512
-        v_s_hat, q_s_hat = self.alter_coattention(ques_feat, v)
-        # N * 512
-        h_w = self.drop_w(self.tanh(self.word_level_encode(q_w_hat + v_w_hat)))
-        # N * 512
-        h_p = self.drop_p(self.tanh(self.phrase_level_encode(torch.cat([q_p_hat + v_p_hat, h_w], dim=1))))
-        # N * 512
-        h_s = self.drop_s(self.tanh(self.question_level_encode(torch.cat([q_s_hat + v_s_hat, h_p], dim=1))))
-        # N * 1024
-        output = self.fc(h_s)
+        v_w_hat, q_w_hat = self._alt_attention(word_feat, v)
+        v_p_hat, q_p_hat = self._alt_attention(phase_feat, v)
+        v_s_hat, q_s_hat = self._alt_attention(ques_feat, v)
+        h_w = self.word_level_encode(q_w_hat + v_w_hat)
+        h_p = self.phrase_level_encode(torch.cat([q_p_hat + v_p_hat, h_w], dim=1))
+        h_s = self.ques_level_encode(torch.cat([q_s_hat + v_s_hat, h_p], dim=1))
+        output = self.predict(h_s)
 
         return output
 

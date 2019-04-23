@@ -4,6 +4,7 @@ import re
 import os
 # import skimage.io as io
 from PIL import Image
+import numpy as np
 import collections
 import pickle
 import torch
@@ -143,8 +144,11 @@ class VqaDataset(Dataset):
         image_id = ann['image_id']
         image_name = self.image_filename_pattern.format(str(image_id).zfill(12))
         image_path = os.path.join(self.image_dir, image_name)
-        image = Image.open(image_path).convert('RGB')
-        image = self.image_transform(image)
+        if os.path.splitext(image_path)[1] == '.npy':
+            image = np.load(image_path).T
+        else:
+            image = Image.open(image_path).convert('RGB')
+            image = self.image_transform(image)
 
         question = self.vqa.qqa[ques_idx]['question']
         answers = ann['answers']

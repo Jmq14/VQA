@@ -18,7 +18,7 @@ class ExperimentRunnerBase(object):
         self._train_dataset_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_data_loader_workers)
 
         # If you want to, you can shuffle the validation dataset and only use a subset of it to speed up debugging
-        self._val_dataset_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=num_data_loader_workers)
+        self._val_dataset_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
         # Use the GPU if it's available.
         self._cuda = torch.cuda.is_available()
@@ -36,11 +36,11 @@ class ExperimentRunnerBase(object):
         total = 0.
         correct = 0.
         for batch_id, batch_data in enumerate(self._val_dataset_loader):
-            if not is_last and batch_id >= 50:
+            if not is_last and batch_id >= 20:
                 break
             images = batch_data['image']
-            questions = torch.max(batch_data['question_encoding'], 0)[0]
-            print(questions.shape)
+            # questions = torch.max(batch_data['question_encoding'], 0)[0]
+            questions = batch_data['question_encoding']
             # answers = torch.max(batch_data['answer_encoding'], 1)[1]
             answers = batch_data['answer_encoding']
             if self._cuda:
@@ -66,8 +66,10 @@ class ExperimentRunnerBase(object):
                 # TODO: Run the model and get the ground truth answers that you'll pass to your optimizer
                 # This logic should be generic; not specific to either the Simple Baseline or CoAttention.
                 images = batch_data['image']
+                # questions = torch.max(batch_data['question_encoding'], 0)[0]
                 questions = batch_data['question_encoding']
-                answers = torch.max(batch_data['answer_encoding'], 1)[1]
+                answers = batch_data['answer_encoding']
+                # answers = torch.max(batch_data['answer_encoding'], 1)[1]
                 if self._cuda:
                     images = images.cuda()
                     questions = questions.cuda()
@@ -92,7 +94,7 @@ class ExperimentRunnerBase(object):
                     print("Epoch: {} has val accuracy {}".format(epoch, val_accuracy))
                     writer.add_scalar('val/accuracy', val_accuracy, current_step)
 
-            self._model.eval()
-            val_accuracy = self.validate(is_last=True)
-            print("Epoch val accuracy {}".format(val_accuracy))
-            writer.add_scalar('val/accuracy', val_accuracy, epoch*num_batches)
+        self._model.eval()
+        val_accuracy = self.validate(is_last=True)
+        print("Final val accuracy {}".format(val_accuracy))
+        writer.add_scalar('val/accuracy', val_accuracy, self._num_epochs*num_batches)
