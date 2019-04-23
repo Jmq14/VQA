@@ -7,7 +7,6 @@ from PIL import Image
 import collections
 import pickle
 import torch
-from torchvision import transforms
 
 
 def _get_majority_ans(answers):
@@ -94,7 +93,8 @@ class VqaDataset(Dataset):
     want to reference the full repo (https://github.com/GT-Vision-Lab/VQA) for usage examples.
     """
 
-    def __init__(self, image_dir, question_json_file_path, annotation_json_file_path, image_filename_pattern, is_training=True):
+    def __init__(self, image_dir, question_json_file_path, annotation_json_file_path, image_filename_pattern,
+                 is_training=True, transform=None):
         """
         Args:
             image_dir (string): Path to the directory with COCO images
@@ -132,22 +132,7 @@ class VqaDataset(Dataset):
 
         # print(self.dictionary)
         # print(self.answers)
-
-        if is_training:
-            self.image_transform = transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-            ])
-        else:
-            self.image_transform = transforms.Compose([
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-            ])
+        self.image_transform = transform
 
     def __len__(self):
         return len(self.ques_idx_list)
