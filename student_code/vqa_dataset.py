@@ -19,7 +19,7 @@ def _get_majority_ans(answers):
 def _build_question_dictionary(vqa, min_thre=0):
     """
     :param vqa: VQA instance
-    :param min_thre: minimal times for a word appearing in the dataset
+    :param min_thre: only words that occur more than this number of times will be put in vocab
     :return: word-index dictionary
     """
     counter = collections.defaultdict(int)
@@ -59,7 +59,8 @@ def _build_answer_dictionary(vqa, min_thre=0):
 def _encode_question(sentence, dictionary, max_question_length=26):
     """
     :param sentence: question sentence
-    :param: word - index dictionary
+    :param dictionary: word - index dictionary
+    :param max_question_length: max length of a caption, in number of words. captions longer than this get clipped
     :return: M x N one-hot torch tensor (M is the max number of words; N is the number of vocabularies)
     """
     words = re.findall(r"[\w']+", sentence)
