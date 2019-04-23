@@ -50,11 +50,11 @@ def save_features(args):
                              is_training=False,
                              transform=transform)
 
-    train_data = DataLoader(train_dataset, batch_size=32, shuffle=False, num_workers=args.num_data_loader_workers)
-    val_data = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=args.num_data_loader_workers)
+    train_data = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_data_loader_workers)
+    val_data = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_data_loader_workers)
 
     model = models.resnet152(pretrained=True)
-    model = nn.Sequential(*list(model.children())[:-3])
+    model = nn.Sequential(*list(model.children())[:-2])
 
     if torch.cuda.is_available():
         model = model.cuda()
@@ -79,5 +79,6 @@ if __name__ == "__main__":
     parser.add_argument('--test_annotation_path', type=str)
     parser.add_argument('--output_path', type=str)
     parser.add_argument('--num_data_loader_workers', type=int, default=10)
+    parser.add_argument('--batch_size', type=int, default=10)
     args = parser.parse_args()
     save_features(args)

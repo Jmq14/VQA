@@ -79,12 +79,10 @@ def _encode_answer(sentence, dictionary):
     :return: indices
     """
     # encode = torch.zeros((len(dictionary) + 1)).type(torch.LongTensor)
-    # if sentence in dictionary.keys():
-    #     encode[dictionary[sentence]] = 1
-    # else:
-    #     encode[-1] = 1
-    # return encode
-    return dictionary[sentence]
+    idx = len(dictionary) 
+    if sentence in dictionary.keys():
+        idx = dictionary[sentence]
+    return idx
 
 
 class VqaDataset(Dataset):
