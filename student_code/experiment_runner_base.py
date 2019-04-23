@@ -1,5 +1,6 @@
 from torch.utils.data import DataLoader
 import torch
+import torch.nn.functional as F
 from tensorboardX import SummaryWriter
 
 
@@ -47,7 +48,8 @@ class ExperimentRunnerBase(object):
                 images = images.cuda()
                 questions = questions.cuda()
                 answers = answers.cuda()
-            predicted_answer = self._model(images, questions) 
+            output = self._model(images, questions)
+            predicted_answer = F.softmax(output)
             ground_truth_answer = answers
             total += ground_truth_answer.size(0)
             correct += (torch.max(predicted_answer, 1)[1] == ground_truth_answer).sum().item()
@@ -63,7 +65,6 @@ class ExperimentRunnerBase(object):
                 current_step = epoch * num_batches + batch_id
 
                 # ============
-                # TODO: Run the model and get the ground truth answers that you'll pass to your optimizer
                 # This logic should be generic; not specific to either the Simple Baseline or CoAttention.
                 images = batch_data['image']
                 # questions = torch.max(batch_data['question_encoding'], 0)[0]
