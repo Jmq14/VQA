@@ -15,7 +15,7 @@ class SimpleBaselineNet(nn.Module):
         self.fc = nn.Linear(2048, n_ans+1)
 
     def forward(self, image, question_encoding):
-        question_encoding = torch.max(question_encoding, 0)[0]
+        question_encoding = torch.max(question_encoding, 1)[0]
         img_feat = self.img_feat(image)
         ques_feat = self.ques_feat(question_encoding)
         feat = torch.cat((img_feat, ques_feat), 1)
